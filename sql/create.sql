@@ -42,6 +42,7 @@ create table batch(
     product_id int not null,
     serial_number varchar(255),
     lot_number varchar(255),
+    quantity int not null,
     foreign key (product_id) references product(product_id)
 );
 
@@ -59,7 +60,6 @@ create table manufacturing(
     manufacturing_id int primary key,
     supplier_id int not null,
     manufacturing_date date not null,
-    quantity int not null,
     foreign key (supplier_id) references supplier(supplier_id)
 );
 
