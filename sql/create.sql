@@ -19,7 +19,8 @@ create table store(
 create table product(
     product_id int primary key,
     name varchar(255) not null,
-    is_end_product number(1) not null
+    is_end_product number(1) not null,
+    check (is_end_product IN (0, 1))
 );
 
 create table supplier(
@@ -43,6 +44,9 @@ create table batch(
     serial_number varchar(255),
     lot_number varchar(255),
     quantity int not null,
+    check (quantity > 0),
+    unique (serial_number),
+    unique (lot_number),
     foreign key (product_id) references product(product_id)
 );
 
@@ -51,6 +55,8 @@ create table shipmentContains(
     batch_id int,
     quantity int not null,
     price_per_unit decimal(10,2) not null,
+    check (quantity > 0),
+    check (price_per_unit > 0),
     primary key (shipment_id, batch_id),
     foreign key (shipment_id) references shipment(shipment_id),
     foreign key (batch_id) references batch(batch_id)
@@ -75,6 +81,7 @@ create table manufacturingUses(
     manufacturing_id int,
     product_id int,
     quantity_used int not null,
+    check (quantity_used > 0),
     primary key (manufacturing_id, product_id),
     foreign key (manufacturing_id) references manufacturing(manufacturing_id),
     foreign key (product_id) references product(product_id)
@@ -84,6 +91,7 @@ create table suppliesProduct(
     supplier_id int,
     product_id int,
     current_price decimal(10,2) not null,
+    check (current_price > 0),
     primary key (supplier_id, product_id),
     foreign key (supplier_id) references supplier(supplier_id),
     foreign key (product_id) references product(product_id)
@@ -103,6 +111,7 @@ create table consistsOf(
     parent_product_id int,
     component_product_id int,
     quantity int not null,
+    check (quantity > 0),
     primary key (parent_product_id, component_product_id),
     foreign key (parent_product_id) references product(product_id),
     foreign key (component_product_id) references product(product_id)
