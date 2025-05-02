@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.Scanner;
+import java.util.UUID;
 import java.sql.*;
 import java.util.InputMismatchException;
 public class functions {
@@ -15,5 +16,15 @@ public class functions {
             System.err.println("[Error] " + e.getMessage());
         }
         return false;
+    }
+    public static int getCurrVal(Connection conn, String sequenceName){//https://forums.oracle.com/ords/apexds/post/generate-unique-random-number-4457
+        String query="select " + sequenceName +".currval from dual";
+        try (Statement st = conn.createStatement(); 
+            ResultSet rs = st.executeQuery(query)){
+            if(rs.next()){return rs.getInt(1);}
+        }catch(SQLException e){
+            System.err.println("[Error] " + e.getMessage());
+        }
+        return -1;
     }
 }
