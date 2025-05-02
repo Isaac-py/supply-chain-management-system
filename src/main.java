@@ -3,7 +3,6 @@ import java.util.Scanner;
 import java.sql.*;
 import java.util.InputMismatchException;
 public class main {
-    private static final String DB_URL = "";
 
     public static void main(String[] args) throws SQLException, IOException, ClassNotFoundException {
         Connection conn = null;
@@ -14,6 +13,9 @@ public class main {
             System.exit(1);
         }
         do{
+            System.out.print("Enter Oracle Databse URL: "); 
+            String DB_URL = in.readLine();
+
             System.out.print("Enter Oracle user id: "); 
             String user = in.readLine();
 
