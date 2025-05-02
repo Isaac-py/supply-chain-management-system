@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.Scanner;
 import java.sql.*;
 import java.util.InputMismatchException;
-public class main {//The begining part of this code such as login handling, input etc. was used the code from HW4Q1.java file
+public class main {
     private static final String DB_URL = "";
 
     public static void main(String[] args) throws SQLException, IOException, ClassNotFoundException {
