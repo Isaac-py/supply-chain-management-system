@@ -37,7 +37,7 @@ public class SupplierInterface{
                       viewPastShipments(conn, supplierId);
                       break;
                   case 3:
-                      // deleteManufacturingEvent(conn, scanner, supplierId);
+                  addProductToCatalog(conn, scanner, supplierId)
                       break;
                   case 4:
                       //funct
@@ -88,4 +88,55 @@ public class SupplierInterface{
             System.err.println("[Error] Something wrong happened during the retrieving shipments" + e.getMessage());
         }
     }
+
+    private static void addProductToCatalog(Connection conn, Scanner scanner, int supplierId){
+      try{
+          System.out.print("Enter product ID of the product you want to add: ");
+          int productId=scanner.nextInt();
+          scanner.nextLine();
+          if(!functions.idExists("product",productId,conn)){
+              System.out.println("[Error] Product ID not found in product table.");
+              return;
+          }
+          String checkQuery = "select count(*) from suppliesProduct where supplier_id=? and product_id=?";
+          try(PreparedStatement ps=conn.prepareStatement(checkQuery)){
+              ps.setInt(1, supplierId);
+              ps.setInt(2, productId);
+              ResultSet rs = ps.executeQuery();
+              if(rs.next() && rs.getInt(1)>0){
+                  System.out.println("[Error] Product already exists in supplier catalog.");
+                  return;
+              }
+          }
+          System.out.print("Enter price per unit: ");
+          double price=scanner.nextDouble();
+          scanner.nextLine();
+          if(price<=0){
+              System.out.println("[Error] Price must be greater than zero.");
+              return;
+          }
+          String product = "insert into suppliesProduct(supplier_id,product_id,current_price) values (?,?,?)";
+          try(PreparedStatement ps = conn.prepareStatement(product)){
+              ps.setInt(1,supplierId);
+              ps.setInt(2,productId);
+              ps.setDouble(3,price);
+              ps.executeUpdate();
+              System.out.println("[Success] Product added to catalog");
+              String getName = "select name from product where product_id = ?";
+              try(PreparedStatement ps2=conn.prepareStatement(getName)){
+                  ps2.setInt(1, productId);
+                  ResultSet rs2=ps2.executeQuery();
+                  if(rs2.next()){
+                      System.out.println("Product overview:");
+                      System.out.println("Product name: "+rs2.getString("name"));
+                      System.out.println("Product ID: "+productId);
+                      System.out.println("Price per unit: $"+price);
+                  }
+              }          
+            }
+      }catch(SQLException e){
+          System.err.println("[Error] Something wrong happened while adding: "+e.getMessage());
+      }
+  }
+  
 }
