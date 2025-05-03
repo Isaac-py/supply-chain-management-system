@@ -26,7 +26,8 @@ public class ManufacturerInterface{
             System.out.println("Where do you want to go from here?");
             System.out.println("1. Record a new Manufacturing Event");
             System.out.println("2. Show all manufacturing activity");
-            System.out.println("3. Exit to main interface");
+            System.out.println("3. Delete manufacturing event");
+            System.out.println("4. Exit to main interface");
             System.out.print("Please select an option: ");
             int choice = scanner.nextInt();
             scanner.nextLine(); 
@@ -38,6 +39,9 @@ public class ManufacturerInterface{
                     viewManufacturingActivity(conn, supplierId);
                     break;
                 case 3:
+                    deleteManufacturingEvent(conn, scanner, supplierId);
+                    break;
+                case 4:
                     condition = false;
                     break;
                 default:
@@ -190,6 +194,7 @@ public class ManufacturerInterface{
             for  (String summary:componentsOverview){
                 System.out.println(summary);
             }
+            System.out.println("\n");
             conn.commit();
         }catch(SQLException e){
             try{
@@ -249,11 +254,51 @@ public class ManufacturerInterface{
                         if(!hasComponents){
                             System.out.println("No components were used during the manufacturing.");
                         }
+                        
                     }
                 }
+                System.out.println(" \n");
             }
         }catch(SQLException e){
             System.err.println("[Error] Something happened during the retrieving manufacturing events" + e.getMessage());
+        }
+    }
+
+    public static void deleteManufacturingEvent(Connection conn, Scanner scanner, int supplierId){
+        System.out.print("Enter the Manufacturing ID to delete: ");
+        int manId=scanner.nextInt();
+        scanner.nextLine();
+        try {
+            conn.setAutoCommit(false);
+            if(!functions.idExists("manufacturing", manId, conn)){
+                System.out.println("[Error] Manufacturing event not found.");
+                return;
+            }
+            try(PreparedStatement ps1 = conn.prepareStatement("delete from manufacturingUses where manufacturing_id=?");
+                PreparedStatement ps2 = conn.prepareStatement("delete from manufacturingProduces where manufacturing_id=?");
+                PreparedStatement ps3 = conn.prepareStatement("delete from manufacturing where manufacturing_id=?")){
+                ps1.setInt(1, manId);
+                ps2.setInt(1, manId);
+                ps3.setInt(1, manId);
+                ps1.executeUpdate();
+                ps2.executeUpdate();
+                ps3.executeUpdate();
+                conn.commit();
+                System.out.println("[Success] Manufacturing event deleted.\n");
+            }
+        }catch(SQLException e){
+            try{
+                conn.rollback();
+            }catch (SQLException rollbackEx){
+                System.err.println("[Error] Something went wrong during rollback: " + rollbackEx.getMessage());
+            }
+            System.err.println("[Error] Something happened during the deleting manufacturing event" + e.getMessage());
+        }finally{
+            try{
+                conn.setAutoCommit(true);
+            }catch(SQLException e){
+                System.err.println("[Error] couldn't reset auto commit: " + e.getMessage());
+            }
         }
     }
     private static String generateSerialNumber(){
