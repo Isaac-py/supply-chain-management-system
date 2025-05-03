@@ -25,7 +25,8 @@ public class ManufacturerInterface{
             System.out.println("~~~ Manufacturer menu ~~~");
             System.out.println("Where do you want to go from here?");
             System.out.println("1. Record a new Manufacturing Event");
-            System.out.println("2. Exit to main interface");
+            System.out.println("2. Show all manufacturing activity");
+            System.out.println("3. Exit to main interface");
             System.out.print("Please select an option: ");
             int choice = scanner.nextInt();
             scanner.nextLine(); 
@@ -34,6 +35,9 @@ public class ManufacturerInterface{
                     recordNewManufacturingEvent(conn, scanner, supplierId);
                     break;
                 case 2:
+                    viewManufacturingActivity(conn, supplierId);
+                    break;
+                case 3:
                     condition = false;
                     break;
                 default:
@@ -200,6 +204,56 @@ public class ManufacturerInterface{
             }catch(SQLException e){
                  System.err.println("[Error] couldn't reset auto commit" + e.getMessage());
             }
+        }
+    }
+    public static void viewManufacturingActivity(Connection conn, int supplierId) {
+        try {
+            String query = "select manufacturing_id, to_char(manufacturing_date,'YYYY-MM-DD') as manufacturing_date from manufacturing where supplier_id = ? order by manufacturing_date desc";//https://stackoverflow.com/questions/44105462/get-only-date-without-time-in-oracle
+            try(PreparedStatement ps = conn.prepareStatement(query)){
+                ps.setInt(1, supplierId);
+                ResultSet rs=ps.executeQuery();
+                while(rs.next()){
+                    int manId = rs.getInt("manufacturing_id");
+                    String date = rs.getString("manufacturing_date");
+                    System.out.println("\nManufacturing ID: " + manId);
+                    System.out.println("Date: " +date);
+                    String batchQuery = "select batch.product_id, product.name, batch.quantity, batch.serial_number, batch.lot_number from manufacturingProduces join batch on manufacturingProduces.batch_id = batch.batch_id join product product on batch.product_id = product.product_id where manufacturingProduces.manufacturing_id = ?";
+                    try(PreparedStatement ps2 = conn.prepareStatement(batchQuery)){
+                        ps2.setInt(1, manId);
+                        ResultSet brs = ps2.executeQuery();
+                        if(brs.next()){
+                            System.out.println("Product ID: "+brs.getInt("product_id"));
+                            System.out.println("Product Name: "+brs.getString("name"));
+                            System.out.println("Quantity Produced: "+ brs.getInt("quantity"));
+                            String serial=brs.getString("serial_number");
+                            String lot=brs.getString("lot_number");
+                            if(serial!=null) System.out.println("Serial Number: " +serial);
+                            if(lot!=null) System.out.println("Lot Number: " + lot) ;
+                        }
+                    }
+                    String component = "select manufacturingUses.product_id, product.name, manufacturingUses.quantity_used from manufacturingUses join product on manufacturingUses.product_id = product.product_id where manufacturingUses.manufacturing_id = ?";
+                    try(PreparedStatement ps3 = conn.prepareStatement(component)){
+                        ps3.setInt(1, manId);
+                        ResultSet crs =  ps3.executeQuery();
+                        boolean hasComponents=false;
+                        int number =0;
+                        while(crs.next()){
+                            if(!hasComponents){
+                                System.out.println("Components Used:");
+                                hasComponents=true;
+                            }
+                            number=number+1;
+                            System.out.print(number);
+                            System.out.println(". Component ID: " + crs.getInt("product_id")+", Name: " + crs.getString("name")+ ", Quantity Used: "+ crs.getInt("quantity_used"));
+                        }
+                        if(!hasComponents){
+                            System.out.println("No components were used during the manufacturing.");
+                        }
+                    }
+                }
+            }
+        }catch(SQLException e){
+            System.err.println("[Error] Something happened during the retrieving manufacturing events" + e.getMessage());
         }
     }
     private static String generateSerialNumber(){
