@@ -3,6 +3,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
@@ -11,8 +12,7 @@ public class ManufacturerInterface{
   public static void connect(Connection conn, Scanner scanner){
     System.out.println("\n~~~ Welcome to Manufacturer Interface! ~~~");
     System.out.print("Enter your Supplier ID: ");
-    int supplierId = scanner.nextInt();
-    scanner.nextLine();
+    int supplierId = functions.getIntInput(scanner);
 
     try{
         if(!functions.idExists("supplier", supplierId, conn)) {
@@ -29,8 +29,8 @@ public class ManufacturerInterface{
             System.out.println("3. Delete manufacturing event");
             System.out.println("4. Exit to main interface");
             System.out.print("Please select an option: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine(); 
+            int choice = 0;
+            choice=functions.getIntInput(scanner);
             switch(choice){
                 case 1:
                     recordNewManufacturingEvent(conn, scanner, supplierId);
@@ -80,14 +80,16 @@ public class ManufacturerInterface{
                 System.out.println("New product was successfully created with ID: " + productId);
             }else{
                 System.out.print("Enter product ID: ");
-                productId = scanner.nextInt();
-                scanner.nextLine();
+                productId = functions.getIntInput(scanner);
+                if(!functions.idExists("product", productId, conn)){
+                    System.out.println("[Error] Product ID not found.");
+                    return;
+                }
             }
 
             // secondly, we ask for how much quanntity we want to produce
             System.out.print("Enter quantity of the product: ");
-            int quantity = scanner.nextInt();
-            scanner.nextLine();
+            int quantity = functions.getIntInput(scanner);
 
             // next, we ask for the type of the product, do decide what type of unique number will it get, serial or lot
             System.out.print("Is this product a unique item (Yes/No)?: ");
@@ -135,8 +137,7 @@ public class ManufacturerInterface{
             // We should record components that were used
             List<String> componentsOverview = new ArrayList<>();
             System.out.print("How many components were used? ");
-            int compCount = scanner.nextInt();
-            scanner.nextLine();
+            int compCount = functions.getIntInput(scanner);
             for (int i=0;i<compCount;i++){
                 String compName = null;
                 System.out.print("Is this a new component? (Yes/No): ");
@@ -154,8 +155,11 @@ public class ManufacturerInterface{
                     System.out.println("Component created with ID: " +compId);
                 }else{
                     System.out.print("Enter existing component product ID: ");
-                    compId = scanner.nextInt();
-                    scanner.nextLine();
+                    compId = functions.getIntInput(scanner);
+                    if(!functions.idExists("product", compId, conn)){
+                        System.out.println("[Error] Component ID not found.");
+                        return;
+                    }
                     String getName = "select name from product where product_id = ?";
                     try(PreparedStatement ps=conn.prepareStatement(getName)){
                         ps.setInt(1, compId);
@@ -168,8 +172,7 @@ public class ManufacturerInterface{
 
 
                 System.out.print("Enter quantity used: ");
-                int quantityUsed = scanner.nextInt();
-                scanner.nextLine();
+                int quantityUsed = functions.getIntInput(scanner);
                 String useInsert = "insert into manufacturingUses (manufacturing_id,product_id,quantity_used) values (?, ?, ?)";
                 try(PreparedStatement ps = conn.prepareStatement(useInsert)){
                     ps.setInt(1, manufacturingId);
@@ -217,7 +220,9 @@ public class ManufacturerInterface{
             try(PreparedStatement ps = conn.prepareStatement(query)){
                 ps.setInt(1, supplierId);
                 ResultSet rs=ps.executeQuery();
+                boolean found = false; 
                 while(rs.next()){
+                    found=true;
                     int manId = rs.getInt("manufacturing_id");
                     String date = rs.getString("manufacturing_date");
                     System.out.println("\nManufacturing ID: " + manId);
@@ -257,6 +262,9 @@ public class ManufacturerInterface{
                         
                     }
                 }
+                if(!found){
+                    System.out.println("No manufacturing activity found.");
+                }
                 System.out.println(" \n");
             }
         }catch(SQLException e){
@@ -266,8 +274,7 @@ public class ManufacturerInterface{
 
     public static void deleteManufacturingEvent(Connection conn, Scanner scanner, int supplierId){
         System.out.print("Enter the Manufacturing ID to delete: ");
-        int manId=scanner.nextInt();
-        scanner.nextLine();
+        int manId=functions.getIntInput(scanner);
         try {
             conn.setAutoCommit(false);
             if(!functions.idExists("manufacturing", manId, conn)){

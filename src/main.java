@@ -36,12 +36,11 @@ public class main {
               System.out.println("Where do you want to go from here?");
               System.out.println("1. Supplier Interface");
               System.out.println("2. Manufacturer Interface");
-              System.out.println("3. Regork Management Interface");
-              System.out.println("4. Exit");
+              // System.out.println("3. Regork Management Interface");
+              System.out.println("3. Exit");
               System.out.print("Please select an option: ");
-
-              int choice = scanner.nextInt();
-              scanner.nextLine();
+              int choice = 0;
+              choice=functions.getIntInput(scanner);
               switch (choice){
                   case 1:
                       SupplierInterface.connect(conn, scanner);
@@ -49,10 +48,10 @@ public class main {
                   case 2:
                       ManufacturerInterface.connect(conn, scanner);
                       break;
+                  // case 3:
+                  //     RegorkManagementInterface.connect(conn, scanner);
+                  //     break;
                   case 3:
-                      RegorkManagementInterface.connect(conn, scanner);
-                      break;
-                  case 4:
                       condition=false;
                       break;
                   default:
@@ -69,6 +68,7 @@ public class main {
           } catch (SQLException e) {
             e.printStackTrace();
           }
-        }    
+        }   
+        scanner.close(); 
     }
 }

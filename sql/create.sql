@@ -116,3 +116,18 @@ create table consistsOf(
     foreign key (parent_product_id) references product(product_id),
     foreign key (component_product_id) references product(product_id)
 );
+
+-- create sequence product_seq
+--     start with 1000
+--     increment by 1
+--     nocache;
+
+-- create sequence batch_seq
+--     start with 1000
+--     increment by 1
+--     nocache;
+
+-- create sequence manufacturing_seq
+--     start with 1000
+--     increment by 1
+--     nocache;

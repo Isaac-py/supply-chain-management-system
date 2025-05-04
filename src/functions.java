@@ -27,4 +27,29 @@ public class functions {
         }
         return -1;
     }
+    public static int getIntInput(Scanner scanner){
+        while(true){
+            if(scanner.hasNextInt()){
+                int val = scanner.nextInt();
+                scanner.nextLine();
+                return val;
+            }else{
+                System.out.println("[Error] Please enter a integer.");
+                scanner.nextLine();
+            }
+        }
+    }
+    
+    public static double getDoubleInput(Scanner scanner){
+        while(true){
+            if(scanner.hasNextDouble()){
+                double val = scanner.nextDouble();
+                scanner.nextLine();
+                return val;
+            }else{
+                System.out.println("[Error] Should be double(eg. 1.2 etc.).");
+                scanner.nextLine();
+            }
+        }
+    }
 }
