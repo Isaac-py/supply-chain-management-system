@@ -30,6 +30,7 @@ public class RegorkManagementInterface{
                   case 1:
                       break;
                   case 2:
+                      addNewStore(scanner, managerId);
                       break;
                   case 3:
                       break;
@@ -48,5 +49,7 @@ public class RegorkManagementInterface{
       }catch(Exception e){
           System.err.println("[Error] " + e.getMessage());
       }
+  }
+  private static void addNewStore(Connection conn, int supplierId){//Add method after getting access to db    
   }
 }
