@@ -17,9 +17,9 @@ public class RegorkManagementInterface{
           while(condition){
               System.out.println("\n~~~ Regork Manager menu ~~~");
               System.out.println("Where do you want to go from here?");
-              System.out.println("1. Option");
-              System.out.println("2. Option");
-              System.out.println("3. Option");
+              System.out.println("1. See shipments that a store received");
+              System.out.println("2. Add a new store");
+              System.out.println("3. Update store information");
               System.out.println("4. Option");
               System.out.println("5. Option");
               System.out.println("6. Exit to main interface");
@@ -36,7 +36,7 @@ public class RegorkManagementInterface{
                   case 4:
                       break;
                   case 5:
-                  break;
+                    break;
                   case 6:
                       condition=false;
                       break;
